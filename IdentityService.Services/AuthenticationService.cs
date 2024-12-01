@@ -61,7 +61,7 @@ namespace IdentityService.Services
             }
             return Convert.ToBase64String(randomBytes);
         }
-
+        /*
         // Store refresh token in the database
         public async Task SaveRefreshToken(int userId, string refreshToken, DateTime expiry)
         {
@@ -88,5 +88,6 @@ namespace IdentityService.Services
 
             return true;
         }
+        */
     }
 }
