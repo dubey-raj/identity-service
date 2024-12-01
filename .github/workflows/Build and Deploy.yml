@@ -50,7 +50,7 @@ jobs:
       with:
           context: IdentityService
           push: true
-          tags: dubeyraj/IdentityService:${{github.run_id}}
+          tags: dubeyraj/identityservice:${{github.run_id}}
           file: ./IdentityService/Dockerfile
   
   deploy:
