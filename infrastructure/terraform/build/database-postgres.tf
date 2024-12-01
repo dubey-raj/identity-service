@@ -28,7 +28,7 @@ resource "aws_db_instance" "postgres" {
   db_name              = "users_db"              # Database name
   username             = "pgadmin"                   # Master username
   password             = "supersecurepassword123"  # Master password
-  parameter_group_name = "default.postgres14"      # Parameter group
+  parameter_group_name = "default.postgres17"      # Parameter group
   publicly_accessible  = true                      # Set to false for private DBs
   vpc_security_group_ids = [aws_security_group.rds_security_group.id] # Security group
   skip_final_snapshot  = true                      # Prevents snapshot on delete
