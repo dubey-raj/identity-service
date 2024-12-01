@@ -48,7 +48,7 @@ jobs:
     - name: Build and push docker Image
       uses: docker/build-push-action@v2
       with:
-          context: IdentityService
+          #context: IdentityService
           push: true
           tags: dubeyraj/identityservice:${{github.run_id}}
           file: ./Dockerfile
