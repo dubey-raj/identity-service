@@ -18,9 +18,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./IdentityService
+    # defaults:
+    #   run:
+    #     working-directory: ./IdentityService
 
     steps:
     - uses: actions/checkout@v4
@@ -51,7 +51,7 @@ jobs:
           context: IdentityService
           push: true
           tags: dubeyraj/identityservice:${{github.run_id}}
-          file: ./IdentityService/Dockerfile
+          file: ./Dockerfile
   
   deploy:
     needs: [build]
