@@ -20,7 +20,7 @@ resource "aws_security_group" "rds_security_group" {
 
 # Create an RDS PostgreSQL instance
 resource "aws_db_instance" "postgres" {
-  allocated_storage    = 2                         # Storage in GB
+  allocated_storage    = 20                         # Storage in GB
   storage_type         = "gp2"                      # General Purpose SSD
   engine               = "postgres"                # Specify PostgreSQL
   engine_version       = "17.2"                    # Specify PostgreSQL version
