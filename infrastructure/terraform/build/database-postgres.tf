@@ -26,7 +26,7 @@ resource "aws_db_instance" "postgres" {
   engine_version       = "17.2"                    # Specify PostgreSQL version
   instance_class       = "db.t3.micro"              # Instance size
   db_name              = "users_db"              # Database name
-  username             = "admin"                   # Master username
+  username             = "pgadmin"                   # Master username
   password             = "supersecurepassword123"  # Master password
   parameter_group_name = "default.postgres14"      # Parameter group
   publicly_accessible  = true                      # Set to false for private DBs
