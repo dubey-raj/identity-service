@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityService", "src\IdentityService\IdentityService.csproj", "{057447D9-3E5D-4016-B774-6400FA3CD375}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityService", "src\IdentityService\IdentityService.csproj", "{057447D9-3E5D-4016-B774-6400FA3CD375}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityService.Services", "src\IdentityService.Services\IdentityService.Services.csproj", "{62570931-D021-4649-9878-AE5E7D42687D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityService.Services", "src\IdentityService.Services\IdentityService.Services.csproj", "{62570931-D021-4649-9878-AE5E7D42687D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityService.Model", "src\IdentityService.Model\IdentityService.Model.csproj", "{746F1E04-1AE1-4985-9E0D-DBB87302C7B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityService.Model", "src\IdentityService.Model\IdentityService.Model.csproj", "{746F1E04-1AE1-4985-9E0D-DBB87302C7B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityService.DataStorage", "src\IdentityService.DataStorage\IdentityService.DataStorage.csproj", "{FBD84478-731E-4F51-808D-EDDB7C203D7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{746F1E04-1AE1-4985-9E0D-DBB87302C7B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{746F1E04-1AE1-4985-9E0D-DBB87302C7B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{746F1E04-1AE1-4985-9E0D-DBB87302C7B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBD84478-731E-4F51-808D-EDDB7C203D7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBD84478-731E-4F51-808D-EDDB7C203D7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBD84478-731E-4F51-808D-EDDB7C203D7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBD84478-731E-4F51-808D-EDDB7C203D7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

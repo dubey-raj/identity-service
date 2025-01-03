@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\IdentityService.DataStorage\IdentityService.DataStorage.csproj" />
     <ProjectReference Include="..\IdentityService.Model\IdentityService.Model.csproj" />
   </ItemGroup>
 

@@ -21,17 +21,22 @@ namespace IdentityService.Controllers
         [Route("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var user = _authenticationService.ValidateUser(request.UserName, request.Password);
-            
-            if (user != null)
+            if (request.Mode == RequestMode.Password)
             {
-                var token = _authenticationService.GenerateToken(user);
-                return Ok(new { Token = token });
+                var user = _authenticationService.ValidateUser(request.UserName, request.Password);
+
+                if (user.IsValid)
+                {
+                    var token = _authenticationService.GenerateToken(user.UserInfo);
+                    return Ok(new { AccessToken = token });
+                }
             }
-            else
+            else if(request.Mode == RequestMode.ClientCredential)
             {
-                return Unauthorized();
+
             }
+
+            return BadRequest();
         }
     }
 }

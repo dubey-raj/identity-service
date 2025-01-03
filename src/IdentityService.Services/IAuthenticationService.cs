@@ -15,7 +15,7 @@ namespace IdentityService.Services
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns>User details, null if passed credentials are invalid</returns>
-        User ValidateUser(string username, string password);
+        (bool IsValid, User UserInfo) ValidateUser(string username, string password);
 
         /// <summary>
         /// Generate new JWT token
