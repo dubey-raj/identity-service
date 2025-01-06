@@ -7,5 +7,6 @@ namespace IdentityService.Model
     {
         public const string Role = "role";
         public const string RefreshToken = "refresh_token";
+        public const string Scope = "role";
     }
 }

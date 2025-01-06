@@ -15,9 +15,15 @@ public partial class UsersContext : DbContext
     {
     }
 
+    public virtual DbSet<Client> Clients { get; set; }
+
+    public virtual DbSet<ClientScope> ClientScopes { get; set; }
+
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
+
+    public virtual DbSet<Scope> Scopes { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -31,6 +37,51 @@ public partial class UsersContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Client>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("clients_pkey");
+
+            entity.ToTable("clients");
+
+            entity.HasIndex(e => e.ClientId, "clients_client_id_key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ClientId)
+                .HasMaxLength(100)
+                .HasColumnName("client_id");
+            entity.Property(e => e.ClientName)
+                .HasMaxLength(100)
+                .HasColumnName("client_name");
+            entity.Property(e => e.ClientSecret)
+                .HasMaxLength(256)
+                .HasColumnName("client_secret");
+            entity.Property(e => e.Description)
+                .HasMaxLength(255)
+                .HasColumnName("description");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(false)
+                .HasColumnName("is_active");
+        });
+
+        modelBuilder.Entity<ClientScope>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("client_scopes_pkey");
+
+            entity.ToTable("client_scopes");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ClientId).HasColumnName("client_id");
+            entity.Property(e => e.ScopeId).HasColumnName("scope_id");
+
+            entity.HasOne(d => d.Client).WithMany(p => p.ClientScopes)
+                .HasForeignKey(d => d.ClientId)
+                .HasConstraintName("client_scopes_client_id_fkey");
+
+            entity.HasOne(d => d.Scope).WithMany(p => p.ClientScopes)
+                .HasForeignKey(d => d.ScopeId)
+                .HasConstraintName("client_scopes_scope_id_fkey");
+        });
+
         modelBuilder.Entity<RefreshToken>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("refresh_tokens_pkey");
@@ -68,6 +119,23 @@ public partial class UsersContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
+                .HasColumnName("name");
+        });
+
+        modelBuilder.Entity<Scope>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("scopes_pkey");
+
+            entity.ToTable("scopes");
+
+            entity.HasIndex(e => e.Name, "scopes_name_key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Description)
+                .HasMaxLength(255)
+                .HasColumnName("description");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
                 .HasColumnName("name");
         });
 

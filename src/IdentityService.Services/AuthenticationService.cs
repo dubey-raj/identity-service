@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Client = IdentityService.Model.Client;
 using User = IdentityService.Model.User;
 
 namespace IdentityService.Services
@@ -16,11 +17,14 @@ namespace IdentityService.Services
         private readonly IConfiguration _config;
         private readonly UsersContext _dbContext;
 
+        ///<inheritdoc/>
         public AuthenticationService(IConfiguration configuration, UsersContext usersContext)
         {
             _config = configuration;
             _dbContext = usersContext;
         }
+
+        ///<inheritdoc/>
         public (bool IsValid, User UserInfo) ValidateUser(string username, string password)
         {
             User? userDetail = null;
@@ -38,63 +42,50 @@ namespace IdentityService.Services
             return (user != null, userDetail!);
         }
 
-        public string GenerateToken(User user)
+        ///<inheritdoc/>
+        public string CreateToken(User user)
         {
-            var secretKey = _config["Jwt:SecretKey"];
-            var issuer = _config["Jwt:Issuer"];
-            var audience = _config["Jwt:Audience"];
-
+            DateTime expiryTime = DateTime.Now.AddHours(1);
             var refreshToken = GenerateRefreshToken();
-            var currentTimeStamp = DateTime.Now;
-            var expiryTime = currentTimeStamp.AddHours(1);
-            var claims = new[]
-            {
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Iat, currentTimeStamp.ToString(), ClaimValueTypes.DateTime),
-            new Claim(CustomClaimTypes.Role, string.Join(",", user.Roles)),
-            new Claim(CustomClaimTypes.RefreshToken, refreshToken)
-            };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
-                claims: claims,
-                expires: expiryTime, // Token expires in 1 hour
-                signingCredentials: creds
-            );
-
-            var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
-            SaveRefreshToken(user.Id, refreshToken, expiryTime);
-            return accessToken;
+            var claims = CreateClaims(user, refreshToken, expiryTime);
+            var token = GenerateToken(claims);
+            SaveToken(user.Id, refreshToken, expiryTime);
+            return token;
         }
 
-        public string GenerateRefreshToken()
+        ///<inheritdoc/>
+        public (bool IsValid, Client ClientInfo) ValidateClient(string clientId, string clientSecret)
         {
-            var randomBytes = new byte[64];
-            using (var rng = RandomNumberGenerator.Create())
+            Client? client = null;
+            var clientDetail = _dbContext.Clients
+                .Include(cs => cs.ClientScopes).
+                ThenInclude(cs => cs.Scope)
+                .FirstOrDefault(c => c.ClientId == clientId && c.ClientSecret == clientSecret);
+
+            if (clientDetail != null)
             {
-                rng.GetBytes(randomBytes);
+                client = new Client
+                {
+                    Id = clientDetail.Id,
+                    Name = clientDetail.ClientName,
+                    Scopes = clientDetail.ClientScopes.Select(sc => sc.Scope.Name).ToArray()
+                };
             }
-            return Convert.ToBase64String(randomBytes);
-        }
-        
-        // Store refresh token in the database
-        public void SaveRefreshToken(int userId, string refreshToken, DateTime expiry)
-        {
-            var token = new RefreshToken
-            {
-                UserId = userId,
-                Token = refreshToken,
-                IssuedAt = DateTime.Now,
-                ExpiresAt = expiry
-            };
-            _dbContext.RefreshTokens.Add(token);
-            _dbContext.SaveChanges();
+            return (client != null, client!);
         }
 
-        // Validate refresh token
+        ///<inheritdoc/>
+        public string CreateToken(Client client)
+        {
+            DateTime expiryTime = DateTime.Now.AddHours(1);
+            var refreshToken = GenerateRefreshToken();
+            var claims = CreateClaims(client, refreshToken, expiryTime);
+            var token = GenerateToken(claims);
+            //SaveToken(client.Id, refreshToken, expiryTime);
+            return token;
+        }
+
+        ///<inheritdoc/>
         public async Task<bool> ValidateRefreshToken(int userId, string refreshToken)
         {
             var token = await _dbContext.RefreshTokens
@@ -106,6 +97,79 @@ namespace IdentityService.Services
             }
 
             return true;
+        }
+
+        private Claim[] CreateClaims(User user, string refreshToken, DateTime expiryTime)
+        {
+            var currentTimeStamp = DateTime.Now;
+            var claims = new[]
+            {
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(JwtRegisteredClaimNames.Iat, currentTimeStamp.ToString(), ClaimValueTypes.DateTime),
+            new Claim(CustomClaimTypes.Role, string.Join(",", user.Roles)),
+            new Claim(CustomClaimTypes.RefreshToken, refreshToken)
+            };
+
+            return claims;
+        }
+
+        private Claim[] CreateClaims(Client client, string refreshToken, DateTime expiryTime)
+        {
+            var currentTimeStamp = DateTime.Now;
+            var claims = new[]
+            {
+            new Claim(JwtRegisteredClaimNames.Sub, client.Name),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(JwtRegisteredClaimNames.Iat, currentTimeStamp.ToString(), ClaimValueTypes.DateTime),
+            new Claim(CustomClaimTypes.Scope, string.Join(",", client.Scopes))
+            };
+
+            return claims;
+        }
+
+        private string GenerateToken(Claim[] claims)
+        {
+            var secretKey = _config["Jwt:SecretKey"];
+            var issuer = _config["Jwt:Issuer"];
+            var audience = _config["Jwt:Audience"];
+            DateTime expiryTime = DateTime.Now.AddHours(1);
+            var refreshToken = GenerateRefreshToken();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                expires: expiryTime,
+                signingCredentials: creds
+            );
+            var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return accessToken;
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomBytes);
+            }
+            return Convert.ToBase64String(randomBytes);
+        }
+        
+        private void SaveToken(int userId, string refreshToken, DateTime expiry)
+        {
+            var token = new RefreshToken
+            {
+                UserId = userId,
+                Token = refreshToken,
+                IssuedAt = DateTime.Now,
+                ExpiresAt = expiry
+            };
+            _dbContext.RefreshTokens.Add(token);
+            _dbContext.SaveChanges();
         }
     }
 }
