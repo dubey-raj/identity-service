@@ -29,6 +29,8 @@ public partial class UsersContext : DbContext
 
     public virtual DbSet<UserAddress> UserAddresses { get; set; }
 
+    public virtual DbSet<UserRole> UserRoles { get; set; }
+
     public virtual DbSet<UserToken> UserTokens { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -37,6 +39,8 @@ public partial class UsersContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresExtension("pgcrypto");
+
         modelBuilder.Entity<Client>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("clients_pkey");
@@ -159,7 +163,7 @@ public partial class UsersContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("first_name");
             entity.Property(e => e.IsActive)
-                .HasColumnType("bit(1)")
+                .HasDefaultValue(false)
                 .HasColumnName("is_active");
             entity.Property(e => e.LastName)
                 .HasMaxLength(100)
@@ -174,23 +178,6 @@ public partial class UsersContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("updated_at");
-
-            entity.HasMany(d => d.Roles).WithMany(p => p.Users)
-                .UsingEntity<Dictionary<string, object>>(
-                    "UserRole",
-                    r => r.HasOne<Role>().WithMany()
-                        .HasForeignKey("RoleId")
-                        .HasConstraintName("user_roles_role_id_fkey"),
-                    l => l.HasOne<User>().WithMany()
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("user_roles_user_id_fkey"),
-                    j =>
-                    {
-                        j.HasKey("UserId", "RoleId").HasName("user_roles_pkey");
-                        j.ToTable("user_roles");
-                        j.IndexerProperty<int>("UserId").HasColumnName("user_id");
-                        j.IndexerProperty<int>("RoleId").HasColumnName("role_id");
-                    });
         });
 
         modelBuilder.Entity<UserAddress>(entity =>
@@ -231,6 +218,27 @@ public partial class UsersContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("user_addresses_user_id_fkey");
+        });
+
+        modelBuilder.Entity<UserRole>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("user_roles_pkey");
+
+            entity.ToTable("user_roles");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.UserRoles)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("user_roles_role_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserRoles)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("user_roles_user_id_fkey");
         });
 
         modelBuilder.Entity<UserToken>(entity =>

@@ -49,7 +49,7 @@ namespace IdentityService.Controllers
                 }
             }
 
-            return BadRequest();
+            return BadRequest("Invalid request");
         }
     }
 }

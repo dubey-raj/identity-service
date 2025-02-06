@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace IdentityService.DataStorage.DAL;
@@ -18,17 +17,17 @@ public partial class User
 
     public string? PhoneNumber { get; set; }
 
-    public BitArray IsActive { get; set; } = null!;
-
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public bool? IsActive { get; set; }
 
     public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
     public virtual ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
 
-    public virtual ICollection<UserToken> UserTokens { get; set; } = new List<UserToken>();
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
-    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
+    public virtual ICollection<UserToken> UserTokens { get; set; } = new List<UserToken>();
 }

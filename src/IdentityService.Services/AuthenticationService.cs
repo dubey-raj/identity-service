@@ -1,5 +1,6 @@
 ﻿using IdentityService.DataStorage.DAL;
 using IdentityService.Model;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -15,12 +16,14 @@ namespace IdentityService.Services
     public class AuthenticationService : IAuthenticationService
     {
         private readonly IConfiguration _config;
+        private readonly IPasswordHasher<User> _passwordHasher;
         private readonly UsersContext _dbContext;
 
         ///<inheritdoc/>
-        public AuthenticationService(IConfiguration configuration, UsersContext usersContext)
+        public AuthenticationService(IConfiguration configuration, IPasswordHasher<User> passwordHasher, UsersContext usersContext)
         {
             _config = configuration;
+            _passwordHasher = passwordHasher;
             _dbContext = usersContext;
         }
 
@@ -28,18 +31,30 @@ namespace IdentityService.Services
         public (bool IsValid, User UserInfo) ValidateUser(string username, string password)
         {
             User? userDetail = null;
-            var user = _dbContext.Users.Include(u=>u.Roles).FirstOrDefault(u => u.Email == username && u.PasswordHash == password);
-            
-            if (user != null)
+            var user = _dbContext.Users
+                .Include(ur=>ur.UserRoles)
+                .ThenInclude(ur=> ur.Role)
+                .FirstOrDefault(u => u.Email == username);
+            if (user == null)
             {
-                userDetail = new User
-                {
-                    Id = user.Id,
-                    UserName = user.Email,
-                    Roles = user.Roles.Select(r => r.Name).ToArray()
-                };
+                return (false, userDetail!);
             }
-            return (user != null, userDetail!);
+
+            var result = _passwordHasher.VerifyHashedPassword(userDetail, user.PasswordHash, password);
+
+            if (result == PasswordVerificationResult.Failed)
+            {
+                return (false, userDetail!);
+            }
+
+            userDetail = new User
+            {
+                Id = user.Id,
+                UserName = user.Email,
+                Roles = user.UserRoles.Select(r => r.Role.Name).ToArray()
+            };
+
+            return (true, userDetail!);
         }
 
         ///<inheritdoc/>
