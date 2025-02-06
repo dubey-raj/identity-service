@@ -11,6 +11,7 @@ COPY *.sln .
 COPY src/IdentityService/*.csproj ./src/IdentityService/
 COPY src/IdentityService.Services/*.csproj ./src/IdentityService.Services/
 COPY src/IdentityService.Model/*.csproj ./src/IdentityService.Model/
+COPY src/IdentityService.DataStorage/*.csproj ./src/IdentityService.DataStorage/
 
 # Restore dependencies
 RUN dotnet restore
