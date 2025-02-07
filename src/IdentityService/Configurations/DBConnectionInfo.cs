@@ -2,11 +2,11 @@
 {
     public class DbConnectionInfo
     {
-        private string Host { get; set; }
-        private int? Port { get; set; }
-        private string Username { get; set; }
-        private string Password { get; set; }
-        private string Database { get; set; }
+        public string Host { get; set; }
+        public int? Port { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string Database { get; set; }
 
         public string ToConnectionString()
         {
