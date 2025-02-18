@@ -9,6 +9,10 @@ variable "vpc_id" {
   description = "id of vpc used to deploy"
   type = string
 }
+variable "SSLCertificateARN"{
+  description = "SSL certificate for https traffic"
+  type        = string
+}
 # Tagging and naming
 variable "Application" {
   description = "Application used to name all resources"

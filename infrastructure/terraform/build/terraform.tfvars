@@ -1,6 +1,7 @@
 Region = "eu-north-1"
 vpc_id = "vpc-0ed3411bc6ebf5c00"
 Application = "identity-service"
+SSLCertificateARN = "arn:aws:acm:eu-north-1:934076056444:certificate/e5bb55c4-41dd-481a-b0ba-43e7112d7664"
 ArtifactoryRepo = "dubeyraj/identityservice"
 EnvCode = "dev"
 EnvTag = "Development"
