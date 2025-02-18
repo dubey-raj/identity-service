@@ -116,12 +116,12 @@ namespace IdentityService.Services
 
         private Claim[] CreateClaims(User user, string refreshToken, DateTime expiryTime)
         {
-            var currentTimeStamp = DateTime.Now;
+            var currentTimeStamp = DateTimeOffset.Now;
             var claims = new[]
             {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Iat, currentTimeStamp.ToString(), ClaimValueTypes.DateTime),
+            new Claim(JwtRegisteredClaimNames.Iat, currentTimeStamp.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
             new Claim(CustomClaimTypes.Role, string.Join(",", user.Roles)),
             new Claim(CustomClaimTypes.RefreshToken, refreshToken)
             };
@@ -131,12 +131,12 @@ namespace IdentityService.Services
 
         private Claim[] CreateClaims(Client client, string refreshToken, DateTime expiryTime)
         {
-            var currentTimeStamp = DateTime.Now;
+            var currentTimeStamp = DateTimeOffset.Now;
             var claims = new[]
             {
             new Claim(JwtRegisteredClaimNames.Sub, client.Name),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Iat, currentTimeStamp.ToString(), ClaimValueTypes.DateTime),
+            new Claim(JwtRegisteredClaimNames.Iat, currentTimeStamp.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
             new Claim(CustomClaimTypes.Scope, string.Join(",", client.Scopes))
             };
 
@@ -148,7 +148,7 @@ namespace IdentityService.Services
             var secretKey = _config["Jwt:SecretKey"];
             var issuer = _config["Jwt:Issuer"];
             var audience = _config["Jwt:Audience"];
-            DateTime expiryTime = DateTime.Now.AddHours(1);
+            DateTimeOffset expiryTime = DateTimeOffset.Now.AddHours(1);
             var refreshToken = GenerateRefreshToken();
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -156,7 +156,7 @@ namespace IdentityService.Services
                 issuer: issuer,
                 audience: audience,
                 claims: claims,
-                expires: expiryTime,
+                expires: expiryTime.DateTime,
                 signingCredentials: creds
             );
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
