@@ -1,4 +1,4 @@
-﻿using IdentityService.DataStorage.DAL;
+﻿using IdentityService.DataStorage.DAO;
 using Microsoft.EntityFrameworkCore;
 
 namespace IdentityService.Configurations
@@ -6,8 +6,8 @@ namespace IdentityService.Configurations
     public static class DBConfiguration
     {
         public static IServiceCollection AddUsersDBContext(this IServiceCollection services, IConfiguration configuration) {
-            services.AddTransient<UsersContext>();
-            services.AddDbContext<UsersContext>(opt => {
+            services.AddTransient<YcUsersDbContext>();
+            services.AddDbContext<YcUsersDbContext>(opt => {
                 var dbConnectionSetting = configuration.GetSection("DBConnectionInfo");
                 if (dbConnectionSetting == null)
                 {

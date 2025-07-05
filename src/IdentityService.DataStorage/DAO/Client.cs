@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IdentityService.DataStorage.DAL;
+namespace IdentityService.DataStorage.DAO;
 
 public partial class Client
 {
@@ -11,11 +11,11 @@ public partial class Client
 
     public string ClientSecret { get; set; } = null!;
 
+    public string ClientName { get; set; } = null!;
+
     public string? Description { get; set; }
 
     public bool IsActive { get; set; }
-
-    public string? ClientName { get; set; }
 
     public virtual ICollection<ClientScope> ClientScopes { get; set; } = new List<ClientScope>();
 }

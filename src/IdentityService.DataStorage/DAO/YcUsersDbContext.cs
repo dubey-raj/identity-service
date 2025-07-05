@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace IdentityService.DataStorage.DAL;
+namespace IdentityService.DataStorage.DAO;
 
-public partial class UsersContext : DbContext
+public partial class YcUsersDbContext : DbContext
 {
-    public UsersContext()
+    public YcUsersDbContext()
     {
     }
 
-    public UsersContext(DbContextOptions<UsersContext> options)
+    public YcUsersDbContext(DbContextOptions<YcUsersDbContext> options)
         : base(options)
     {
     }
@@ -33,6 +33,10 @@ public partial class UsersContext : DbContext
 
     public virtual DbSet<UserToken> UserTokens { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Host=localhost;Database=yc-users-db;Username=postgres;Password=admin");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("pgcrypto");
@@ -45,7 +49,9 @@ public partial class UsersContext : DbContext
 
             entity.HasIndex(e => e.ClientId, "clients_client_id_key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
             entity.Property(e => e.ClientId)
                 .HasMaxLength(100)
                 .HasColumnName("client_id");
@@ -69,7 +75,9 @@ public partial class UsersContext : DbContext
 
             entity.ToTable("client_scopes");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
             entity.Property(e => e.ClientId).HasColumnName("client_id");
             entity.Property(e => e.ScopeId).HasColumnName("scope_id");
 
@@ -88,7 +96,11 @@ public partial class UsersContext : DbContext
 
             entity.ToTable("refresh_tokens");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.HasIndex(e => new { e.Token, e.IsRevoked, e.ExpiresAt }, "idx_refresh_token_lookup");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
             entity.Property(e => e.ExpiresAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("expires_at");
@@ -116,7 +128,9 @@ public partial class UsersContext : DbContext
 
             entity.HasIndex(e => e.Name, "roles_name_key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .HasColumnName("name");
@@ -130,7 +144,9 @@ public partial class UsersContext : DbContext
 
             entity.HasIndex(e => e.Name, "scopes_name_key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
             entity.Property(e => e.Description)
                 .HasMaxLength(255)
                 .HasColumnName("description");
@@ -147,7 +163,9 @@ public partial class UsersContext : DbContext
 
             entity.HasIndex(e => e.Email, "users_email_key").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnType("timestamp without time zone")
@@ -182,7 +200,9 @@ public partial class UsersContext : DbContext
 
             entity.ToTable("user_addresses");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
             entity.Property(e => e.AddressLine1)
                 .HasMaxLength(255)
                 .HasColumnName("address_line1");
@@ -222,7 +242,9 @@ public partial class UsersContext : DbContext
 
             entity.ToTable("user_roles");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
             entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
@@ -243,7 +265,11 @@ public partial class UsersContext : DbContext
 
             entity.ToTable("user_tokens");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.HasIndex(e => new { e.UserId, e.IsRevoked, e.ExpiresAt }, "idx_user_active_tokens");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
             entity.Property(e => e.ExpiresAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("expires_at");

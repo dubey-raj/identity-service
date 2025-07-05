@@ -1,4 +1,4 @@
-﻿using IdentityService.DataStorage.DAL;
+﻿using IdentityService.DataStorage.DAO;
 using IdentityService.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,10 +17,10 @@ namespace IdentityService.Services
     {
         private readonly IConfiguration _config;
         private readonly IPasswordHasher<User> _passwordHasher;
-        private readonly UsersContext _dbContext;
+        private readonly YcUsersDbContext _dbContext;
 
         ///<inheritdoc/>
-        public AuthenticationService(IConfiguration configuration, IPasswordHasher<User> passwordHasher, UsersContext usersContext)
+        public AuthenticationService(IConfiguration configuration, IPasswordHasher<User> passwordHasher, YcUsersDbContext usersContext)
         {
             _config = configuration;
             _passwordHasher = passwordHasher;
@@ -60,7 +60,7 @@ namespace IdentityService.Services
         ///<inheritdoc/>
         public string CreateToken(User user)
         {
-            DateTime expiryTime = DateTime.Now.AddHours(1);
+            DateTime expiryTime = DateTime.Now.AddHours(12);
             var refreshToken = GenerateRefreshToken();
             var claims = CreateClaims(user, refreshToken, expiryTime);
             var token = GenerateToken(claims);
@@ -92,7 +92,7 @@ namespace IdentityService.Services
         ///<inheritdoc/>
         public string CreateToken(Client client)
         {
-            DateTime expiryTime = DateTime.Now.AddHours(1);
+            DateTime expiryTime = DateTime.Now.AddHours(12);
             var refreshToken = GenerateRefreshToken();
             var claims = CreateClaims(client, refreshToken, expiryTime);
             var token = GenerateToken(claims);

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IdentityService.DataStorage.DAL;
+namespace IdentityService.DataStorage.DAO;
 
 public partial class Scope
 {
